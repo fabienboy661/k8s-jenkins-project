@@ -11,23 +11,39 @@ pipeline {
     }
     
     stages {
+        stage('Clean workspace') {
+            steps {
+                // Supprimer le répertoire de travail existant
+                deleteDir()
+            }
+        }
+        
         stage('Build') {
             steps {
-                sh 'git clone $APP_URL'
+                // Cloner le référentiel Git
+                sh "git clone $APP_URL $APP_DIR"
+                
+                // Aller dans le répertoire de l'application
                 dir("$APP_DIR") {
+                    // Installer les dépendances
                     sh 'npm install'
                 }
             }
         }
+        
         stage('Test') {
             steps {
+                // Aller dans le répertoire de l'application
                 dir("$APP_DIR") {
+                    // Exécuter les tests
                     sh 'npm test'
                 }
             }
         }
+        
         stage('Deploy to Minikube') {
             steps {
+                // Aller dans le répertoire de l'application
                 dir("$APP_DIR") {
                     // Déployer le déploiement Kubernetes
                     sh 'kubectl apply -f deployment.yaml'
